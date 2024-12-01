@@ -65,6 +65,22 @@ public class AccountsStreamValidatorTests
     }
 
     [Fact]
+    public void WithEmptyFields_ReturnsErrors()
+    {
+        // Arrange
+        string input = ";";
+        using var inputStream = new MemoryStream(Encoding.UTF8.GetBytes(input));
+        using var inputStreamReader = new StreamReader(inputStream);
+
+        // Act
+        var validationMessages = new AccountsStreamValidator().ValidateStream(inputStreamReader);
+
+        // Assert
+        List<string> expectedMessages = ["Account name, account number - not valid for 1 line ' '"];
+        Assert.Equal(expectedMessages, validationMessages);
+    }
+
+    [Fact]
     public void WithEmptyLines_ReturnsCorrectLineIndex()
     {
         // Arrange
