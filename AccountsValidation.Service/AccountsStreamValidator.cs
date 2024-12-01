@@ -6,15 +6,14 @@ namespace AccountsValidation.Service;
 
 public class AccountsStreamValidator
 {
-    private readonly List<string> invalidLines = [];
+    public record Result(List<string> InvalidLines, Dictionary<int, TimeSpan> ExecutionTimePerLine);
 
-    public Dictionary<int, TimeSpan> ExecutionTimePerLine { get; } = [];
+    private List<string> invalidLines = [];
+    private Dictionary<int, TimeSpan> executionTimePerLine = [];
 
-    public IList<string> ValidateStream(StreamReader inputStream)
+    public Result ValidateStream(StreamReader inputStream)
     {
-        invalidLines.Clear();
-        ExecutionTimePerLine.Clear();
-
+        ResetState();
         for (int i = 0; inputStream.Peek() > 0; i++)
         {
             var line = inputStream.ReadLine();
@@ -29,13 +28,19 @@ public class AccountsStreamValidator
                 ProcessLine(line, lineIndex);
             });
 
-            ExecutionTimePerLine.Add(lineIndex, executionTime);
+            executionTimePerLine.Add(lineIndex, executionTime);
         }
 
-        return invalidLines;
+        return new Result(InvalidLines: invalidLines, ExecutionTimePerLine: executionTimePerLine);
     }
 
-    public void ProcessLine(string line, int lineIndex)
+    private void ResetState()
+    {
+        invalidLines = [];
+        executionTimePerLine = [];
+    }
+
+    private void ProcessLine(string line, int lineIndex)
     {
         var account = AccountParser.Parse(line);
 
@@ -48,7 +53,7 @@ public class AccountsStreamValidator
         invalidLines.Add(errorMessage);
     }
 
-    public static ICollection<ValidationResult> ValidateAccount(Account account)
+    private ICollection<ValidationResult> ValidateAccount(Account account)
     {
         ValidationContext validator = new(account);
         ICollection<ValidationResult> results = [];
@@ -58,7 +63,7 @@ public class AccountsStreamValidator
         return results;
     }
 
-    public static string FormatValidationMessage(
+    private string FormatValidationMessage(
         Account account,
         ICollection<ValidationResult> validationResults,
         int lineIndex
@@ -74,7 +79,7 @@ public class AccountsStreamValidator
         return $"{propertiesSentence} - not valid for {lineIndex} line '{account}'";
     }
 
-    public static string GetPropertyDisplayName(string property)
+    private string GetPropertyDisplayName(string property)
     {
         var propertyInfo = typeof(Account).GetProperty(property);
         var displayNameAttribute = propertyInfo!.GetCustomAttribute<DisplayNameAttribute>();

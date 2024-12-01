@@ -13,9 +13,9 @@ public static class ValidationEndpoint
         using var reader = new StreamReader(file.OpenReadStream());
 
         var validator = new AccountsStreamValidator();
-        var invalidLines = validator.ValidateStream(reader);
+        var validationResult = validator.ValidateStream(reader);
 
-        var performance = validator.ExecutionTimePerLine.Select(
+        var performance = validationResult.ExecutionTimePerLine.Select(
             (pair) =>
                 new LinePerformance(
                     pair.Key,
@@ -23,15 +23,15 @@ public static class ValidationEndpoint
                 )
         );
 
-        if (invalidLines.Any())
+        if (validationResult.InvalidLines.Count == 0)
         {
-            var response = new InvalidFileResponse(
-                InvalidLines: invalidLines,
-                Performance: performance
-            );
-            return TypedResults.BadRequest(response);
+            return TypedResults.Ok(new ValidFileResponse(Performance: performance));
         }
 
-        return TypedResults.Ok(new ValidFileResponse(Performance: performance));
+        var response = new InvalidFileResponse(
+            InvalidLines: validationResult.InvalidLines,
+            Performance: performance
+        );
+        return TypedResults.BadRequest(response);
     }
 }

@@ -16,10 +16,10 @@ public class AccountsStreamValidatorTests
         using var inputStreamReader = new StreamReader(inputStream);
 
         // Act
-        var validationMessages = new AccountsStreamValidator().ValidateStream(inputStreamReader);
+        var result = new AccountsStreamValidator().ValidateStream(inputStreamReader);
 
         // Assert
-        Assert.Empty(validationMessages);
+        Assert.Empty(result.InvalidLines);
     }
 
     [Fact]
@@ -34,7 +34,7 @@ public class AccountsStreamValidatorTests
         using var inputStreamReader = new StreamReader(inputStream);
 
         // Act
-        var validationMessages = new AccountsStreamValidator().ValidateStream(inputStreamReader);
+        var result = new AccountsStreamValidator().ValidateStream(inputStreamReader);
 
         // Assert
         List<string> expectedMessages =
@@ -42,7 +42,7 @@ public class AccountsStreamValidatorTests
             "Account number - not valid for 1 line 'Thomas 31234567'",
             "Account name - not valid for 2 line 'richard 3123456'",
         ];
-        Assert.Equal(expectedMessages, validationMessages);
+        Assert.Equal(expectedMessages, result.InvalidLines);
     }
 
     [Fact]
@@ -54,14 +54,14 @@ public class AccountsStreamValidatorTests
         using var inputStreamReader = new StreamReader(inputStream);
 
         // Act
-        var validationMessages = new AccountsStreamValidator().ValidateStream(inputStreamReader);
+        var result = new AccountsStreamValidator().ValidateStream(inputStreamReader);
 
         // Assert
         List<string> expectedMessages =
         [
             "Account name, account number - not valid for 1 line 'thomas 31234567'",
         ];
-        Assert.Equal(expectedMessages, validationMessages);
+        Assert.Equal(expectedMessages, result.InvalidLines);
     }
 
     [Fact]
@@ -73,11 +73,11 @@ public class AccountsStreamValidatorTests
         using var inputStreamReader = new StreamReader(inputStream);
 
         // Act
-        var validationMessages = new AccountsStreamValidator().ValidateStream(inputStreamReader);
+        var result = new AccountsStreamValidator().ValidateStream(inputStreamReader);
 
         // Assert
         List<string> expectedMessages = ["Account name, account number - not valid for 1 line ' '"];
-        Assert.Equal(expectedMessages, validationMessages);
+        Assert.Equal(expectedMessages, result.InvalidLines);
     }
 
     [Fact]
@@ -96,7 +96,7 @@ public class AccountsStreamValidatorTests
         using var inputStreamReader = new StreamReader(inputStream);
 
         // Act
-        var validationMessages = new AccountsStreamValidator().ValidateStream(inputStreamReader);
+        var result = new AccountsStreamValidator().ValidateStream(inputStreamReader);
 
         // Assert
         List<string> expectedMessages =
@@ -104,7 +104,7 @@ public class AccountsStreamValidatorTests
             "Account number - not valid for 2 line 'Thomas 31234567'",
             "Account name - not valid for 5 line 'richard 3123456'",
         ];
-        Assert.Equal(expectedMessages, validationMessages);
+        Assert.Equal(expectedMessages, result.InvalidLines);
     }
 
     [Fact]
@@ -124,7 +124,7 @@ public class AccountsStreamValidatorTests
         using var inputStreamReader = new StreamReader(inputStream);
 
         // Act
-        var validationMessages = new AccountsStreamValidator().ValidateStream(inputStreamReader);
+        var result = new AccountsStreamValidator().ValidateStream(inputStreamReader);
 
         // Assert
         List<string> expectedMessages =
@@ -135,7 +135,7 @@ public class AccountsStreamValidatorTests
             "Account number - not valid for 5 line 'Bob 329398.'",
             "Account name - not valid for 6 line 'michael 3113902'",
         ];
-        Assert.Equal(expectedMessages, validationMessages);
+        Assert.Equal(expectedMessages, result.InvalidLines);
     }
 
     [Fact]
@@ -155,13 +155,12 @@ public class AccountsStreamValidatorTests
         using var inputStreamReader = new StreamReader(inputStream);
 
         // Act
-        var validator = new AccountsStreamValidator();
-        validator.ValidateStream(inputStreamReader);
+        var result = new AccountsStreamValidator().ValidateStream(inputStreamReader);
 
         // Assert
-        Assert.Equal([1, 2, 3, 4, 5, 6, 7], validator.ExecutionTimePerLine.Keys.ToList());
+        Assert.Equal([1, 2, 3, 4, 5, 6, 7], result.ExecutionTimePerLine.Keys.ToList());
         Assert.True(
-            validator.ExecutionTimePerLine.Values.All(timeSpan => timeSpan.TotalMilliseconds > 0)
+            result.ExecutionTimePerLine.Values.All(timeSpan => timeSpan.TotalMilliseconds > 0)
         );
     }
 }
