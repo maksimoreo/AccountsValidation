@@ -10,7 +10,7 @@ public static class ValidationEndpoint
     > Validate(IFormFile file)
     {
         using var reader = new StreamReader(file.OpenReadStream());
-        var invalidLines = AccountValidator.ValidateStream(reader);
+        var invalidLines = new AccountValidator().ValidateStream(reader);
 
         if (invalidLines.Any())
         {

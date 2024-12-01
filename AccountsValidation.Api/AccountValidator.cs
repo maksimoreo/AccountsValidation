@@ -1,57 +1,89 @@
+using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
+using System.Reflection;
+
 namespace AccountsValidation.Api;
 
-class AccountValidator
+public class AccountValidator
 {
-    public static IList<string> ValidateStream(StreamReader inputStream)
+    private readonly List<string> invalidLines = [];
+
+    public IList<string> ValidateStream(StreamReader inputStream)
     {
-        List<string> invalidLines = [];
+        invalidLines.Clear();
 
         for (int i = 0; inputStream.Peek() > 0; i++)
         {
             var line = inputStream.ReadLine();
 
             if (string.IsNullOrWhiteSpace(line))
-                break;
+                continue;
 
-            var accountEntry = ParseAccountEntry(line);
-
-            var invalidFields = ValidateAccountEntry(accountEntry);
-
-            if (invalidFields.Any())
-            {
-                var invalidFieldsSerialized = string.Join(", ", invalidFields);
-                var accountEntrySerialized = $"{accountEntry.Name} {accountEntry.Number}";
-                var lineIndex = i + 1;
-
-                var lineExplanation =
-                    $"{invalidFieldsSerialized} - not valid for {lineIndex} line '{accountEntrySerialized}'";
-
-                invalidLines.Add(lineExplanation);
-            }
+            ProcessLine(line, i);
         }
 
         return invalidLines;
     }
 
-    public static Account ParseAccountEntry(string input)
+    public void ProcessLine(string line, int index)
+    {
+        var account = ParseAccount(line);
+
+        var validationResults = ValidateAccount(account);
+
+        if (validationResults.Count == 0)
+            return;
+
+        string errorMessage = FormatValidationMessage(
+            account,
+            validationResults,
+            lineIndex: index + 1
+        );
+        invalidLines.Add(errorMessage);
+    }
+
+    public static Account ParseAccount(string input)
     {
         var parts = input.Split(';');
         var number = parts[0].Trim();
         var name = parts[1].Trim();
-        var account = new Account(Number: number, Name: name);
+        var account = new Account(number: number, name: name);
 
         return account;
     }
 
-    public static IEnumerable<string> ValidateAccountEntry(Account accountEntry)
+    public static ICollection<ValidationResult> ValidateAccount(Account account)
     {
-        HashSet<string> invalidFields = [];
+        ValidationContext validator = new(account);
+        ICollection<ValidationResult> results = [];
 
-        if (!char.IsUpper(accountEntry.Name[0]))
-        {
-            invalidFields.Add("Account name");
-        }
+        Validator.TryValidateObject(account, validator, results, true);
 
-        return invalidFields;
+        return results;
+    }
+
+    public static string FormatValidationMessage(
+        Account account,
+        ICollection<ValidationResult> validationResults,
+        int lineIndex
+    )
+    {
+        var properties = validationResults
+            .SelectMany(result => result.MemberNames)
+            .Distinct()
+            .Select(GetPropertyDisplayName);
+
+        var propertiesJoined = string.Join(", ", properties);
+
+        return $"{propertiesJoined} - not valid for {lineIndex} line '{account}'";
+    }
+
+    public static string GetPropertyDisplayName(string property)
+    {
+        var propertyInfo = typeof(Account).GetProperty(property);
+        var displayNameAttribute = propertyInfo!.GetCustomAttribute<DisplayNameAttribute>();
+        var displayName = displayNameAttribute!.DisplayName;
+
+        return displayName!;
     }
 }
