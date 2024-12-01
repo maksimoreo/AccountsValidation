@@ -1,7 +1,7 @@
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 
-namespace AccountsValidation.Api;
+namespace AccountsValidation.Service;
 
 public class Account(string name, string number)
 {

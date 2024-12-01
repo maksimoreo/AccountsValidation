@@ -2,9 +2,9 @@ using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Reflection;
 
-namespace AccountsValidation.Api;
+namespace AccountsValidation.Service;
 
-public class AccountValidator
+public class AccountsStreamValidator
 {
     private readonly List<string> invalidLines = [];
 
@@ -27,7 +27,7 @@ public class AccountValidator
 
     public void ProcessLine(string line, int index)
     {
-        var account = ParseAccount(line);
+        var account = AccountParser.Parse(line);
 
         var validationResults = ValidateAccount(account);
 
@@ -40,16 +40,6 @@ public class AccountValidator
             lineIndex: index + 1
         );
         invalidLines.Add(errorMessage);
-    }
-
-    public static Account ParseAccount(string input)
-    {
-        var parts = input.Split(';');
-        var number = parts[0].Trim();
-        var name = parts[1].Trim();
-        var account = new Account(number: number, name: name);
-
-        return account;
     }
 
     public static ICollection<ValidationResult> ValidateAccount(Account account)
@@ -73,9 +63,9 @@ public class AccountValidator
             .Distinct()
             .Select(GetPropertyDisplayName);
 
-        var propertiesJoined = string.Join(", ", properties);
+        var propertiesSentence = CreateSentence(properties);
 
-        return $"{propertiesJoined} - not valid for {lineIndex} line '{account}'";
+        return $"{propertiesSentence} - not valid for {lineIndex} line '{account}'";
     }
 
     public static string GetPropertyDisplayName(string property)
@@ -85,5 +75,22 @@ public class AccountValidator
         var displayName = displayNameAttribute!.DisplayName;
 
         return displayName!;
+    }
+
+    /// <summary>
+    /// Joins words with comma
+    /// </summary>
+    /// <param name="words">Words to make a sentence from</param>
+    /// <returns>String of words separated by comma</returns>
+    public static string CreateSentence(IEnumerable<string> words)
+    {
+        var firstWord = Capitalize(words.First());
+        var correctedCaseWords = words.Skip(1).Select(word => word.ToLower()).Prepend(firstWord);
+        return string.Join(", ", correctedCaseWords);
+    }
+
+    public static string Capitalize(string input)
+    {
+        return string.Concat(input[0].ToString().ToUpper(), input[1..]);
     }
 }

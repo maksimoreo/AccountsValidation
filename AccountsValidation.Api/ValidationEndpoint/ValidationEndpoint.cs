@@ -1,3 +1,4 @@
+using AccountsValidation.Service;
 using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace AccountsValidation.Api.ValidationEndpoint;
@@ -10,7 +11,7 @@ public static class ValidationEndpoint
     > Validate(IFormFile file)
     {
         using var reader = new StreamReader(file.OpenReadStream());
-        var invalidLines = new AccountValidator().ValidateStream(reader);
+        var invalidLines = new AccountsStreamValidator().ValidateStream(reader);
 
         if (invalidLines.Any())
         {
