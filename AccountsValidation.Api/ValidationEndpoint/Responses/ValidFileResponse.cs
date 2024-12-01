@@ -1,3 +1,4 @@
 namespace AccountsValidation.Api.ValidationEndpoint.Responses;
 
-public record ValidFileResponse(bool FileValid = true);
+public record ValidFileResponse(IEnumerable<LinePerformance> Performance)
+    : BaseResponse(FileValid: true, Performance: Performance);

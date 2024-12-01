@@ -8,9 +8,12 @@ public class AccountsStreamValidator
 {
     private readonly List<string> invalidLines = [];
 
+    public Dictionary<int, TimeSpan> ExecutionTimePerLine { get; } = [];
+
     public IList<string> ValidateStream(StreamReader inputStream)
     {
         invalidLines.Clear();
+        ExecutionTimePerLine.Clear();
 
         for (int i = 0; inputStream.Peek() > 0; i++)
         {
@@ -19,13 +22,20 @@ public class AccountsStreamValidator
             if (string.IsNullOrWhiteSpace(line))
                 continue;
 
-            ProcessLine(line, i);
+            int lineIndex = i + 1;
+
+            var executionTime = PerformanceUtilities.WithMeasuredTime(() =>
+            {
+                ProcessLine(line, lineIndex);
+            });
+
+            ExecutionTimePerLine.Add(lineIndex, executionTime);
         }
 
         return invalidLines;
     }
 
-    public void ProcessLine(string line, int index)
+    public void ProcessLine(string line, int lineIndex)
     {
         var account = AccountParser.Parse(line);
 
@@ -34,11 +44,7 @@ public class AccountsStreamValidator
         if (validationResults.Count == 0)
             return;
 
-        string errorMessage = FormatValidationMessage(
-            account,
-            validationResults,
-            lineIndex: index + 1
-        );
+        string errorMessage = FormatValidationMessage(account, validationResults, lineIndex);
         invalidLines.Add(errorMessage);
     }
 

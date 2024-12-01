@@ -137,4 +137,31 @@ public class AccountsStreamValidatorTests
         ];
         Assert.Equal(expectedMessages, validationMessages);
     }
+
+    [Fact]
+    public void ExecutionTimePerLine_ReturnsExecutionTime()
+    {
+        // Arrange
+        string input =
+            @"32999921;Thomas
+3293982acc;Richard
+8293982;xAEA-12
+329a982;Rose
+329398.;Bob
+3113902;michael
+3113902acc;Rob;
+        ";
+        using var inputStream = new MemoryStream(Encoding.UTF8.GetBytes(input));
+        using var inputStreamReader = new StreamReader(inputStream);
+
+        // Act
+        var validator = new AccountsStreamValidator();
+        validator.ValidateStream(inputStreamReader);
+
+        // Assert
+        Assert.Equal([1, 2, 3, 4, 5, 6, 7], validator.ExecutionTimePerLine.Keys.ToList());
+        Assert.True(
+            validator.ExecutionTimePerLine.Values.All(timeSpan => timeSpan.TotalMilliseconds > 0)
+        );
+    }
 }
