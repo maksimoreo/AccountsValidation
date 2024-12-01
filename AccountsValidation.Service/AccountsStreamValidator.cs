@@ -63,7 +63,7 @@ public class AccountsStreamValidator
             .Distinct()
             .Select(GetPropertyDisplayName);
 
-        var propertiesSentence = CreateSentence(properties);
+        var propertiesSentence = StringUtilities.CreateSentence(properties);
 
         return $"{propertiesSentence} - not valid for {lineIndex} line '{account}'";
     }
@@ -75,22 +75,5 @@ public class AccountsStreamValidator
         var displayName = displayNameAttribute!.DisplayName;
 
         return displayName!;
-    }
-
-    /// <summary>
-    /// Joins words with comma
-    /// </summary>
-    /// <param name="words">Words to make a sentence from</param>
-    /// <returns>String of words separated by comma</returns>
-    public static string CreateSentence(IEnumerable<string> words)
-    {
-        var firstWord = Capitalize(words.First());
-        var correctedCaseWords = words.Skip(1).Select(word => word.ToLower()).Prepend(firstWord);
-        return string.Join(", ", correctedCaseWords);
-    }
-
-    public static string Capitalize(string input)
-    {
-        return string.Concat(input[0].ToString().ToUpper(), input[1..]);
     }
 }
