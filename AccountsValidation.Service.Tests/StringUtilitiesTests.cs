@@ -2,55 +2,17 @@ namespace AccountsValidation.Service.Tests;
 
 public class StringUtilitiesTests
 {
-    [Fact]
-    public void WithValidInput_ReturnsSetnence()
+    [Theory]
+    [InlineData(new string[] { }, "")]
+    [InlineData(new string[] { "one" }, "One")]
+    [InlineData(new string[] { "one", "two", "three" }, "One, two, three")]
+    [InlineData(new string[] { "One", "Two", "Three" }, "One, two, three")]
+    public void WithValidInput_ReturnsSetnence(string[] input, string expected)
     {
-        // Arrange
-        List<string> words = ["one", "two", "three"];
-
         // Act
-        string result = StringUtilities.CreateSentence(words);
+        string result = StringUtilities.CreateSentence(input);
 
         // Assert
-        Assert.Equal("One, two, three", result);
-    }
-
-    [Fact]
-    public void WithEmptyInput_ReturnsEmptyString()
-    {
-        // Arrange
-        List<string> words = [];
-
-        // Act
-        string result = StringUtilities.CreateSentence(words);
-
-        // Assert
-        Assert.Equal("", result);
-    }
-
-    [Fact]
-    public void WithSingleWord_ReturnsSingleWordString()
-    {
-        // Arrange
-        List<string> words = ["one"];
-
-        // Act
-        string result = StringUtilities.CreateSentence(words);
-
-        // Assert
-        Assert.Equal("One", result);
-    }
-
-    [Fact]
-    public void WhenAllWordsAreCapitalized_ReturnsCorrectSentence()
-    {
-        // Arrange
-        List<string> words = ["One", "Two", "Three"];
-
-        // Act
-        string result = StringUtilities.CreateSentence(words);
-
-        // Assert
-        Assert.Equal("One, two, three", result);
+        Assert.Equal(expected, result);
     }
 }

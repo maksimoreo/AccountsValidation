@@ -53,7 +53,7 @@ public class AccountsStreamValidator
         invalidLines.Add(errorMessage);
     }
 
-    private ICollection<ValidationResult> ValidateAccount(Account account)
+    private static ICollection<ValidationResult> ValidateAccount(Account account)
     {
         ValidationContext validator = new(account);
         ICollection<ValidationResult> results = [];

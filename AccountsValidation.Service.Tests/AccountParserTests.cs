@@ -2,32 +2,22 @@ namespace AccountsValidation.Service.Tests;
 
 public class AccountParserTests
 {
-    [Fact]
-    public void WithValidInput_ReturnsAccount()
+    [Theory]
+    [InlineData("1234567;Max", "Max", "1234567")]
+    [InlineData("1234567;Max;", "Max", "1234567")]
+    [InlineData(" 1234567  ;   Max    ", "Max", "1234567")]
+    public void WithValidInput_ReturnsAccount(
+        string input,
+        string expectedAccountName,
+        string expectedAccountNumber
+    )
     {
-        // Arrange
-        string input = "1234567;Max";
-
         // Act
         Account account = AccountParser.Parse(input);
 
         // Assert
-        Assert.Equal("1234567", account.Number);
-        Assert.Equal("Max", account.Name);
-    }
-
-    [Fact]
-    public void WithMultipleSemiColons_ReturnsAccount()
-    {
-        // Arrange
-        string input = "1234567;Max;";
-
-        // Act
-        Account account = AccountParser.Parse(input);
-
-        // Assert
-        Assert.Equal("1234567", account.Number);
-        Assert.Equal("Max", account.Name);
+        Assert.Equal(expectedAccountNumber, account.Number);
+        Assert.Equal(expectedAccountName, account.Name);
     }
 
     [Fact]
@@ -44,19 +34,5 @@ public class AccountParserTests
             "Fields must be separated by ';' character (Parameter 'input')",
             exception.Message
         );
-    }
-
-    [Fact]
-    public void WithSpacesAroundFields_TrimsSpaces()
-    {
-        // Arrange
-        string input = " 1234567  ;   Max    ";
-
-        // Act
-        Account account = AccountParser.Parse(input);
-
-        // Assert
-        Assert.Equal("1234567", account.Number);
-        Assert.Equal("Max", account.Name);
     }
 }

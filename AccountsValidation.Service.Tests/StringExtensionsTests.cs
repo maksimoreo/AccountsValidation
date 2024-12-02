@@ -2,55 +2,17 @@ namespace AccountsValidation.Service.Tests;
 
 public class StringExtensionsTests
 {
-    [Fact]
-    public void WithValidString_ReturnsCapitalizedString()
+    [Theory]
+    [InlineData("word", "Word")]
+    [InlineData("", "")]
+    [InlineData(" word", " word")]
+    [InlineData("0word", "0word")]
+    public void WithValidString_ReturnsCapitalizedString(string input, string expected)
     {
-        // Arrange
-        var input = "word";
-
         // Act
         var result = input.Capitalize();
 
         // Assert
-        Assert.Equal("Word", result);
-    }
-
-    [Fact]
-    public void WithEmptyString_ReturnsEmptyString()
-    {
-        // Arrange
-        var input = "";
-
-        // Act
-        var result = input.Capitalize();
-
-        // Assert
-        Assert.Equal("", result);
-    }
-
-    [Fact]
-    public void WhenStringBeginsWithSpace_ReturnsUnchangedString()
-    {
-        // Arrange
-        var input = " word";
-
-        // Act
-        var result = input.Capitalize();
-
-        // Assert
-        Assert.Equal(" word", result);
-    }
-
-    [Fact]
-    public void WhenStringBeginsWithDigit_ReturnsUnchangedString()
-    {
-        // Arrange
-        var input = "0word";
-
-        // Act
-        var result = input.Capitalize();
-
-        // Assert
-        Assert.Equal("0word", result);
+        Assert.Equal(expected, result);
     }
 }
